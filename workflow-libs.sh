@@ -92,7 +92,7 @@ cancel_jobs_by_script() {
         source ${resource_inputs_sh}
 
         cancel_script="${resource_jobdir}/${resource_label}/cancel.sh"
-        cancel_script_exists=$(ssh Alvaro.Vidal@34.170.164.62 "[ -f \"${cancel_script}\" ]" && echo "True" || echo "False")
+        cancel_script_exists=$(ssh ${resource_publicIp} "[ -f \"${cancel_script}\" ]" && echo "True" || echo "False")
 
         if [[ ${cancel_script_exits} == "True" ]]; then
             echo; echo "Running Canceling script ${cancel_script} in ${resource_name} - ${resource_publicIp}"
