@@ -88,7 +88,12 @@
                 ></param>
           </when>
         </conditional>
-        <param name='nports' label='Number of Ports to Reserve' type='hidden' value='1'  ></param> 
+        <param 
+            name='nports' 
+            label='Ports' 
+            type='text' 
+            value='1' 
+        ></param>
     </section>
   </inputs>
 </tool>
