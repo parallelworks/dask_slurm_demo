@@ -27,23 +27,19 @@ cluster.adapt(
 
 # Connect a Dask client to the cluster
 client = Client(cluster)
+# Generate a large random Dask array
+shape = (100000, 100000)  # Large shape for a slow computation
+chunks = (1000, 1000)     # Chunk size for parallelism
+x = da.random.random(size=shape, chunks=chunks)
 
-# Define a simple Dask computation (e.g., parallelized addition)
-def add(a, b):
-    return a + b
+# Calculate the mean of the array
+mean = x.mean()
 
-# Create Dask arrays for your computation
-x = da.ones(100000000, chunks=10000)
-y = da.ones(100000000, chunks=10000)
-
-# Perform the computation using Dask
-result = add(x, y).sum()
-
-# Compute the result and retrieve the value
-result_value = result.compute()
+# Compute the result and wait for it to finish
+result = mean.compute()
 
 # Print the result
-print("Result:", result_value)
+print(f"Mean: {result}")
 
 # Close the Dask client and cluster when done
 client.close()
