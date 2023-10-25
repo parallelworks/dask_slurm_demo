@@ -33,8 +33,8 @@ def add(a, b):
     return a + b
 
 # Create Dask arrays for your computation
-x = da.ones(10000000, chunks=10000)
-y = da.ones(10000000, chunks=10000)
+x = da.ones(100000000, chunks=10000)
+y = da.ones(100000000, chunks=10000)
 
 # Perform the computation using Dask
 result = add(x, y).sum()
