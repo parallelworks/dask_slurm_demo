@@ -94,7 +94,7 @@ cancel_jobs_by_script() {
         cancel_script="${resource_jobdir}/${resource_label}/cancel.sh"
         cancel_script_exists=$(ssh ${resource_publicIp} "[ -f \"${cancel_script}\" ]" && echo "True" || echo "False")
 
-        if [[ ${cancel_script_exits} == "True" ]]; then
+        if [[ ${cancel_script_exists} == "True" ]]; then
             echo; echo "Running Canceling script ${cancel_script} in ${resource_name} - ${resource_publicIp}"
             ssh -o StrictHostKeyChecking=no ${resource_publicIp} ${cancel_script}
         fi
