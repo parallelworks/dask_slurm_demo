@@ -15,10 +15,11 @@ cluster = SLURMCluster(
     memory = form_inputs['memory_per_job'],  # Memory per job
     header_skip = ['--mem'], # Adding this argument allows Dask to ignore the memory parameter
     scheduler_options= {
-        'dashboard_address': '0.0.0.0:' + os.environ['dashboard_port_local'],
-        'http_prefix': '/me/' + str(form_inputs['resource']['ports'][0])
+        'dashboard_address': '0.0.0.0:' + os.environ['dashboard_port_local']
     }
 )
+
+#         'http_prefix': '/me/' + str(form_inputs['resource']['ports'][0])
 
 # Scale the cluster to a desired number of workers
 cluster.adapt(
