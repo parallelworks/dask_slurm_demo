@@ -22,6 +22,7 @@ if [ -z "${dashboard_port_local}" ]; then
 fi
 
 ssh_cmd="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+set -x
 ${ssh_cmd} -fN -R 0.0.0.0:${dashboard_port_pw}:localhost:${dashboard_port_local} usercontainer
 
 # Run Dask
