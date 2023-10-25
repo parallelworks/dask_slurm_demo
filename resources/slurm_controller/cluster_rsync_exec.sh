@@ -30,6 +30,7 @@ rm-f /tmp/${dashboard_port_local}.port.used
 # Create tunnel cancel script
 echo '#!/bin/bash' > cancel.sh
 echo "kill ${tunnel_pid}" >> cancel.sh
+echo "kill $$" >> cancel.sh
 chmod +x cancel.sh
 
 # Run Dask
