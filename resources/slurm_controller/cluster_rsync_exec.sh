@@ -8,7 +8,7 @@ source workflow-libs.sh
 if [[ ${conda_install} == "true" ]]; then
     create_conda_env_from_yaml ${conda_dir} ${conda_env} conda_env.yaml
 else
-    ${load_env}
+    eval ${load_env}
 fi
 
 python main.py
