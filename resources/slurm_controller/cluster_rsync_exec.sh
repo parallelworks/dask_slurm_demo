@@ -14,7 +14,7 @@ fi
 
 # Create tunnnel for dask dashboard
 dashboard_port_pw=${resource_ports}
-dashboard_port_local=$(findAvailablePort)
+export dashboard_port_local=$(findAvailablePort)
 
 if [ -z "${dashboard_port_local}" ]; then
     echo "ERROR: No available port was found for Dask's dashboard"
