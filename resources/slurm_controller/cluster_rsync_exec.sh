@@ -29,12 +29,17 @@ rm-f /tmp/${dashboard_port_local}.port.used
 
 # Create tunnel cancel script
 echo '#!/bin/bash' > cancel.sh
-echo "kill ${tunnel_pid}" >> cancel.sh
-echo "kill $$" >> cancel.sh
+
+cat >> ${session_sh} <<HERE
+kill ${tunnel_pid}
+kill $$
+kill \$(ps -x | grep ${job_name}  | awk '{print \$1}')
+HERE
+
 chmod +x cancel.sh
 
 # Run Dask
-python main.py
+python main.py --job_name ${job_name}
 
 # Clean tunnel
 kill ${tunnel_pid}
