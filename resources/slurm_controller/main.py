@@ -28,7 +28,7 @@ cluster.adapt(
 # Connect a Dask client to the cluster
 client = Client(cluster)
 # Generate a large random Dask array
-shape = (100000, 100000)  # Large shape for a slow computation
+shape = (1000000, 1000000)  # Large shape for a slow computation
 chunks = (1000, 1000)     # Chunk size for parallelism
 x = da.random.random(size=shape, chunks=chunks)
 
