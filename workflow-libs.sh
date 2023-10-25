@@ -160,15 +160,15 @@ findAvailablePort() {
     # Find an available availablePort
     minPort=6000
     maxPort=9000
-    for port in \$(seq \${minPort} \${maxPort} | shuf); do
-        out=\$(netstat -aln | grep LISTEN | grep \${port})
-        if [ -z "\${out}" ]; then
+    for port in $(seq ${minPort} ${maxPort} | shuf); do
+        out=$(netstat -aln | grep LISTEN | grep ${port})
+        if [ -z "${out}" ]; then
             # To prevent multiple users from using the same available port --> Write file to reserve it
-            portFile=/tmp/\${port}.port.used
-            if ! [ -f "\${portFile}" ]; then
-                touch \${portFile}
-                availablePort=\${port}
-                echo \${port}
+            portFile=/tmp/${port}.port.used
+            if ! [ -f "${portFile}" ]; then
+                touch ${portFile}
+                availablePort=${port}
+                echo ${port}
                 break
             fi
         fi
