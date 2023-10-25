@@ -30,7 +30,7 @@ rm-f /tmp/${dashboard_port_local}.port.used
 # Create tunnel cancel script
 echo '#!/bin/bash' > cancel.sh
 
-cat >> ${session_sh} <<HERE
+cat >> cancel.sh <<HERE
 kill ${tunnel_pid}
 kill $$
 kill \$(ps -x | grep ${job_name}  | awk '{print \$1}')
