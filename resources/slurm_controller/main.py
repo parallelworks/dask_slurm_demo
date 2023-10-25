@@ -36,9 +36,6 @@ def add(a, b):
 x = da.ones(100000000, chunks=10000)
 y = da.ones(100000000, chunks=10000)
 
-import time
-time.sleep(99999)
-
 # Perform the computation using Dask
 result = add(x, y).sum()
 
