@@ -24,7 +24,17 @@ fi
 ssh_cmd="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 set -x
 ${ssh_cmd} -fN -R 0.0.0.0:${dashboard_port_pw}:localhost:${dashboard_port_local} usercontainer
+tunnel_pid=$!
+rm-f /tmp/${dashboard_port_local}.port.used
+
+# Create tunnel cancel script
+echo '#!/bin/bash' > cancel.sh
+echo "kill ${tunnel_pid}" >> cancel.sh
+chmod +x cancel.sh
 
 # Run Dask
 python main.py
+
+# Clean tunnel
+./cancel.sh
 
