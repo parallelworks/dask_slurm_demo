@@ -34,7 +34,8 @@ chmod +x cancel.sh
 
 # Run Dask
 python main.py
+echo "kill $!" >> cancel.sh
 
 # Clean tunnel
-./cancel.sh
+kill ${tunnel_pid}
 
