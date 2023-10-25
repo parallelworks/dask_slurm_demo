@@ -87,6 +87,7 @@
                     help='To load the environment, enter the appropriate command, for example: module load module-name or source path/to/env.sh.' 
                 ></param>
           </when>
+          <param name='nports' label='Number of Ports to Reserve' type='hidden' value='1'  ></param> 
         </conditional>
     </section>
   </inputs>
