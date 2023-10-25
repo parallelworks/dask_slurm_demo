@@ -1,5 +1,6 @@
 <tool id='NA' name='NA'>
   <command interpreter='bash'>main.sh</command>
+  <cancel interpreter='bash'>cancel.sh</cancel>
   <inputs>
       <section name='pwrl_slurm_controller' type='section' title='Dask SLURMCluster Host' expanded='true'>
         <param 
