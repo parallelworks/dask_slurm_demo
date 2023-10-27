@@ -40,6 +40,7 @@ chmod +x cancel.sh
 
 # Run Dask
 python main.py --job_name ${job_name}
+sleep 9999
 
 # Clean tunnel
 kill ${tunnel_pid}
