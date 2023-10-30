@@ -10,14 +10,14 @@ service_port_worker=$2
 # START NGINX WRAPPER #
 #######################
 
-nginx_port=80 #$(findAvailablePort)
+nginx_port=$(findAvailablePort)
 if [ -z "${nginx_port}" ]; then
     echo "ERROR: No available port was found for nginx wrapper"
     exit 1
 fi
 
 # Write config file
-cat >> conf.d <<HERE
+cat >> config.conf <<HERE
 server {
  listen ${nginx_port};
  server_name _;
@@ -42,8 +42,9 @@ HERE
 container_name="nginx-${nginx_port}"
 # Remove container when job is canceled
 echo "sudo docker stop ${container_name}" >> cancel.sh
+echo "sudo docker rm ${container_name}" >> cancel.sh
 # Start container
-sudo docker run  -d --name ${container_name}  -v $PWD/conf:/etc/nginx/conf.d --network=host nginx
+sudo docker run  -d --name ${container_name}  -v $PWD/config.conf:/etc/nginx/conf.d/config.conf --network=host nginx
 # Print logs
 sudo docker logs ${container_name}
 # This is a placeholder file to reserve the port before it is used
