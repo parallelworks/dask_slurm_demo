@@ -1,4 +1,5 @@
 #!/bin/bash
+source workflow-libs.sh
 
 # Service port in the platform
 service_port_pw=$1
@@ -10,6 +11,10 @@ service_port_worker=$2
 #######################
 
 nginx_port=$(findAvailablePort)
+if [ -z "${nginx_port}" ]; then
+    echo "ERROR: No available port was found for nginx wrapper"
+    exit 1
+fi
 
 # Write config file
 cat >> conf.d <<HERE
