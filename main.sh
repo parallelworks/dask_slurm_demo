@@ -19,3 +19,5 @@ sed -i "s/.*JOB_STATUS.*/    \"JOB_STATUS\": \"Running\",/" service.json
 
 # Run job on remote resource
 cluster_rsync_exec
+
+exit 0
