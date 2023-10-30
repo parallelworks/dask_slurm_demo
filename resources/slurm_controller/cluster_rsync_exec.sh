@@ -27,8 +27,6 @@ ${ssh_cmd} -fN -R 0.0.0.0:${dashboard_port_pw}:localhost:${dashboard_port_local}
 tunnel_pid=$(ps -x | grep ssh | grep ${dashboard_port_local} | awk '{print $1}')
 rm-f /tmp/${dashboard_port_local}.port.used
 
-sleep 99999
-
 # Create tunnel cancel script
 echo '#!/bin/bash' > cancel.sh
 

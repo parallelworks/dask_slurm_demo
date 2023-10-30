@@ -46,10 +46,6 @@ result = mean.compute()
 # Print the result
 print(f"Mean: {result}")
 
-# FIXME: REMOVE
-import time
-time.sleep(99999)
-
 # Close the Dask client and cluster when done
 client.close()
 cluster.close()
