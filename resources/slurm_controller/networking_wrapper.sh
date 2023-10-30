@@ -10,7 +10,7 @@ service_port_worker=$2
 # START NGINX WRAPPER #
 #######################
 
-nginx_port=$(findAvailablePort)
+nginx_port=80 #$(findAvailablePort)
 if [ -z "${nginx_port}" ]; then
     echo "ERROR: No available port was found for nginx wrapper"
     exit 1
