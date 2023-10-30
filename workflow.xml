@@ -92,7 +92,7 @@
         <param 
             name='nports' 
             label='Ports' 
-            type='text' 
+            type='hidden' 
             value='1' 
         ></param>
     </section>
