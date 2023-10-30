@@ -58,6 +58,6 @@ rm /tmp/${nginx_port}.port.used
 ssh_cmd="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 ${ssh_cmd} -fN -R 0.0.0.0:${service_port_pw}:localhost:${nginx_port} usercontainer
 # Remove tunnel when job is canceled
-tunnel_pid=$(ps -x | grep ssh | grep ${service_port_worker} | awk '{print $1}')
+tunnel_pid=$(ps -x | grep ssh | grep ${service_port_pw} | awk '{print $1}')
 echo "kill ${tunnel_pid}" >> cancel.sh
 
