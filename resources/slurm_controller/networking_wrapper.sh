@@ -44,6 +44,8 @@ container_name="nginx-${nginx_port}"
 echo "sudo docker stop ${container_name}" >> cancel.sh
 # Start container
 sudo docker run  -d --name ${container_name}  -v $PWD/conf:/etc/nginx/conf.d --network=host nginx
+# Print logs
+sudo docker logs ${container_name}
 # This is a placeholder file to reserve the port before it is used
 rm /tmp/${nginx_port}.port.used
 
