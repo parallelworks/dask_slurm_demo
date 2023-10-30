@@ -2,6 +2,10 @@
 jobdir=$(dirname $0)
 cd ${jobdir}
 
+# Initialize cancel script
+echo '#!/bin/bash' > cancel.sh
+chmod +x cancel.sh
+
 source inputs.sh
 source workflow-libs.sh
 
@@ -12,35 +16,29 @@ else
     eval ${load_env}
 fi
 
-# Create tunnnel for dask dashboard
+# Get ports for dask dashboard
 dashboard_port_pw=${resource_ports}
-export dashboard_port_local=80 #$(findAvailablePort)
+export dashboard_port_worker=$(findAvailablePort)
 
-if [ -z "${dashboard_port_local}" ]; then
+if [ -z "${dashboard_port_worker}" ]; then
     echo "ERROR: No available port was found for Dask's dashboard"
     exit 1
 fi
 
-ssh_cmd="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-set -x
-${ssh_cmd} -fN -R 0.0.0.0:${dashboard_port_pw}:localhost:${dashboard_port_local} usercontainer
-tunnel_pid=$(ps -x | grep ssh | grep ${dashboard_port_local} | awk '{print $1}')
-rm-f /tmp/${dashboard_port_local}.port.used
+# Start networking to display Dask dashboard in the PW platform
+bash networking_wrapper.sh ${dashboard_port_pw} ${dashboard_port_worker}
 
-# Create tunnel cancel script
-echo '#!/bin/bash' > cancel.sh
 
+# Kill dask when job is canceled
 cat >> cancel.sh <<HERE
-kill ${tunnel_pid}
 kill $$
 kill \$(ps -x | grep ${job_name}  | awk '{print \$1}')
+rm /tmp/${dashboard_port_worker}.port.used
 HERE
-
-chmod +x cancel.sh
 
 # Run Dask
 python main.py --job_name ${job_name}
 
-# Clean tunnel
-kill ${tunnel_pid}
+# Clean after job
+./cancel.sh
 
