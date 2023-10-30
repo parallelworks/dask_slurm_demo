@@ -26,8 +26,12 @@ if [ -z "${dashboard_port_worker}" ]; then
 fi
 
 # Start networking to display Dask dashboard in the PW platform
-bash networking_wrapper.sh ${dashboard_port_pw} ${dashboard_port_worker}
-
+if sudo -n true 2>/dev/null; then
+    # Need root access to forward dashboard to platform
+    bash networking_wrapper.sh ${dashboard_port_pw} ${dashboard_port_worker}
+else
+    echo; echo "WARNING: DASHBOARD CANNOT CONNECT TO PW BECAUSE USER ${USER} DOES NOT HAVE SUDO PRIVILEGES"
+fi
 
 # Kill dask when job is canceled
 cat >> cancel.sh <<HERE
