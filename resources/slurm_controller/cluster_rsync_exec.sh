@@ -12,6 +12,8 @@ source workflow-libs.sh
 # Load or install conda environment
 if [[ ${conda_install} == "true" ]]; then
     create_conda_env_from_yaml ${conda_dir} ${conda_env} conda_env.yaml
+    source ${conda_dir}/etc/profile.d/conda.sh
+    conda activate ${conda_env}
 else
     eval ${load_env}
 fi
