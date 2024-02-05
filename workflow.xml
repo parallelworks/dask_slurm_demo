@@ -51,44 +51,41 @@
             help='maximum parameter of the SLURMCluster.adapt method' 
             value='10'
         ></param>
-        <conditional name="conda_install_cond">
-            <param 
-                name="conda_install" 
-                type="boolean" 
-                truevalue="Yes" 
-                falsevalue="No" 
-                checked="True" 
-                label="Install miniconda if not there?" 
-                help='Select Yes to install miniconda if the above directory does not exist'
-                optional='true' 
-                float="right"
-            ></param>
-            <when value="Yes">
-                <param 
-                    name='conda_dir' 
-                    label='Path to conda environment' 
-                    type='text' 
-                    value='__WORKDIR__/pw/miniconda3/' 
-                    help='Path to conda installation directory' 
-                ></param>
-                <param 
-                    name='conda_env' 
-                    label='Conda environment' 
-                    type='text' 
-                    value='dask-slurm' 
-                    help='Environment with Dask' 
-                ></param>
-            </when>
-            <when value="No">
-                <param 
-                    name='load_env' 
-                    label='Command to the Python environment' 
-                    type='text' 
-                    value='source __WORKDIR__/pw/miniconda3/etc/profile.d/conda.sh; conda activate dask' 
-                    help='To load the environment, enter the appropriate command, for example: module load module-name or source path/to/env.sh.' 
-                ></param>
-          </when>
-        </conditional>
+        <param 
+            name="conda_install" 
+            type="boolean" 
+            truevalue="Yes" 
+            falsevalue="No" 
+            checked="True" 
+            label="Install miniconda if not there?" 
+            help='Select Yes to install miniconda if the above directory does not exist'
+            optional='true' 
+        ></param>
+        <param 
+            name='conda_dir' 
+            label='Path to conda environment' 
+            type='text' 
+            value='__WORKDIR__/pw/miniconda3/' 
+            help='Path to conda installation directory'
+            show_if='pwrl_slurm_controller.conda_install'
+        ></param>
+        <param 
+            name='conda_env' 
+            label='Conda environment' 
+            type='text' 
+            value='dask-slurm' 
+            help='Environment with Dask'
+            show_if='pwrl_slurm_controller.conda_install'
+        ></param>
+        <param 
+            name='load_env' 
+            label='Command to the Python environment' 
+            type='text' 
+            value='source __WORKDIR__/pw/miniconda3/etc/profile.d/conda.sh; conda activate dask' 
+            help='To load the environment, enter the appropriate command, for example: module load module-name or source path/to/env.sh.' 
+            depends_on='pwrl_slurm_controller.conda_install'
+            show_if='false'
+        ></param>
         <param 
             name='nports' 
             label='Ports' 
