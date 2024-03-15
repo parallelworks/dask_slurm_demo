@@ -8,14 +8,15 @@
             type='computeResource' 
             label='Resource' 
             hideUserWorkspace='true' 
-            help='Resource to run the script'>
-        </param>
+            help='Resource to run the script'
+        ></param>
         <param 
             name='partition' 
-            label='SLURM Partition' 
-            type='text' 
-            value='' 
-            help='queue parameter in SLURMCluster object' 
+            label='SLURM partition' 
+            type='dynamicPartitionDropdown' 
+            resource='pwrl_slurm_controller.resource'
+            help='Partition to submit the interactive job. Leave empty to let SLURM pick the optimal option.' 
+            optional='true'   
         ></param>
         <param 
             name='cores_per_job' 
