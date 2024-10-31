@@ -16,7 +16,7 @@ cluster = SLURMCluster(
     header_skip = ['--mem'], # Adding this argument allows Dask to ignore the memory parameter
     scheduler_options= {
         'dashboard_address': ':' + os.environ['dashboard_port_worker'],
-        'http_prefix': '/me/' +  str(form_inputs['resource']['ports'][0]) + '/'
+        'http_prefix': os.environ['http_prefix']
     }
 )
 
@@ -28,6 +28,9 @@ cluster.adapt(
 
 # Connect a Dask client to the cluster
 client = Client(cluster)
+
+import time
+time.sleep(8000)
 # Generate a large random Dask array
 shape = (200000, 200000)  # Large shape for a slow computation
 chunks = (1000, 1000)     # Chunk size for parallelism
