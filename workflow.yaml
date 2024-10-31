@@ -134,7 +134,7 @@ jobs:
           set -x
           sed -i "s|.*PORT.*|    \"PORT\": \"${workspace_port}\",|" service.json
           sed -i "s/.*JOB_STATUS.*/    \"JOB_STATUS\": \"Running\",/" service.json 
-          sshcmd="ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -L ${workspace_port}:0.0.0.0:${nginx_proxy_port} ${host}"
+          sshcmd="ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -L 0.0.0.0:${workspace_port}:localhost:${nginx_proxy_port} ${host}"
           ${sshcmd} << EOF
           set -x
           if [ -z "${load_env}" ]; then
