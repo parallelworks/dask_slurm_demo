@@ -1,2 +1,0 @@
-# Dask SLURM Demo
-This demo runs the Dask script `resources/slurm_controller/main.py` on the controller node of your chosen compute resource, allowing you to monitor the job via the Dask dashboard within the platform. The provided Dask script employs the [SLURMCluster](https://jobqueue.dask.org/en/latest/generated/dask_jobqueue.SLURMCluster.html) object for SLURM job submissions. To facilitate this, the resources/slurm_controller directory is transferred to the selected resource using rsync.

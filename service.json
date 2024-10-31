@@ -2,6 +2,6 @@
     "URL": "/me",
     "PORT": "",
     "SLUG": "status\"",
-    "JOB_STATUS": "Configuring",
+    "JOB_STATUS": "Waiting for Dask to start",
     "ERROR_MESSAGE": ""
 }
