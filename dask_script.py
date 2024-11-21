@@ -1,4 +1,5 @@
 import os, json
+from pprint import pprint
 
 import dask.array as da  # Import Dask
 from dask.distributed import Client
@@ -19,6 +20,19 @@ cluster = SLURMCluster(
         'http_prefix': os.environ['http_prefix']
     }
 )
+
+# Print the cluster configuration
+print("SLURM Cluster Configuration:")
+pprint({
+    "queue": form_inputs['partition'],
+    "cores": int(form_inputs['cores_per_job']),
+    "memory": form_inputs['memory_per_job'],
+    "header_skip": ['--mem'],
+    "scheduler_options": {
+        'dashboard_address': ':' + os.environ['dashboard_port_worker'],
+        'http_prefix': os.environ['http_prefix']
+    }
+})
 
 # Scale the cluster to a desired number of workers
 cluster.adapt(

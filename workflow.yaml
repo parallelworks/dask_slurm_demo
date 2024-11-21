@@ -1,3 +1,10 @@
+permissions:
+  - '*'
+sessions:
+  dashboard:
+    useTLS: false
+    redirect: true
+
 jobs:
   install_dask:
     steps:
@@ -61,80 +68,59 @@ jobs:
           scp dask_script.py  ${{ inputs.resource.ip }}:~/${PWD/#$HOME/}
           # Transfer inputs.json
           scp inputs.json  ${{ inputs.resource.ip }}:~/${PWD/#$HOME/}
-  reserve_ports:
+  create_session:
     needs:
       - install_dask
       - prepare_work_directory
     steps:
-      - name: Reserve dashboard port in user workspace
-        run: |
-          set -x
-          findAvailablePort() {
-            # Find an available availablePort
-            minPort=$1
-            maxPort=$2
-            for port in $(seq ${minPort} ${maxPort} | shuf); do
-              out=$(netstat -aln | grep LISTEN | grep ${port})
-              if [ -z "${out}" ]; then
-                # To prevent multiple users from using the same available port --> Write file to reserve it
-                portFile=/tmp/${port}.port.used
-                if ! [ -f "${portFile}" ]; then
-                  touch ${portFile}
-                  echo ${port}
-                  break
-                fi
-              fi
-            done
-          }
-          workspace_port=$(findAvailablePort 50000 55000)
-          echo workspace_port=${workspace_port} >> $OUTPUTS
-          echo "export workspace_port=${workspace_port}" >> ports 
-      - name: Reserve dashboard ports in cluster
+      - name: Reserve dashboard ports
         env:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.resource.ip }}
         run: |
-          set -x
-          findAvailablePort() {
-            # Find an available availablePort
-            minPort=$1
-            maxPort=$2
-            for port in $(seq ${minPort} ${maxPort} | shuf); do
-              out=$(${sshcmd} netstat -aln | grep LISTEN | grep ${port})
-              if [ -z "${out}" ]; then
-                # To prevent multiple users from using the same available port --> Write file to reserve it
-                portFile=/tmp/${port}.port.used
-                if ! [ -f "${portFile}" ]; then
-                  touch ${portFile}
-                  echo ${port}
-                  break
-                fi
-              fi
-            done
-          }
-          cluster_port=$(findAvailablePort 6000 9000)
-          echo cluster_port=${cluster_port} >> $OUTPUTS
-          echo "export cluster_port=${cluster_port}" >> ports 
-          nginx_proxy_port=$(findAvailablePort 6000 9000)
-          echo nginx_proxy_port=${nginx_port} >> $OUTPUTS
+          local_port=$(pw agent open-port)
+          echo "export local_port=${local_port}" >> ports
+          echo "local_port=${local_port}" >> $OUTPUTS
+
+          dashboard_port=$(${sshcmd} pw agent open-port)
+          echo "export dashboard_port=${dashboard_port}" >> ports
+          echo "dashboard_port=${dashboard_port}" >> $OUTPUTS
+
+          nginx_proxy_port=$(${sshcmd} pw agent open-port)
           echo "export nginx_proxy_port=${nginx_proxy_port}" >> ports
+          echo "nginx_proxy_port=${nginx_proxy_port}" >> $OUTPUTS
+          
+          cat ports
+      - name: Get Controller Hostname
+        env:
+          sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.resource.ip }}
+        run: |
+          target_hostname=$(${sshcmd} hostname)
+          echo "target_hostname=${target_hostname}"  | tee -a $OUTPUTS
+      - name: Create session
+        uses: parallelworks/update-session
+        with:
+          remotePort: "${{ needs.create_session.outputs.nginx_proxy_port }}"
+          localPort: "${{ needs.create_session.outputs.local_port }}"
+          remoteHost: "${{ needs.create_session.outputs.target_hostname }}"
+          status: running
+          slug: "status"
+          target: ${{ inputs.resource.id }}
+          name: ${{ sessions.dashboard }}
+
+
   run_dask:
     needs:
-      - install_dask
-      - prepare_work_directory
-      - reserve_ports
+      - create_session
     steps:
       - name: Run Dask
         env:
-          host: ${{ inputs.resource.ip }}
+          sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.resource.ip }}
           load_env: ${{ inputs.load_env }}
           conda_env: ${{ inputs.conda_env }}
           conda_dir: ${{ inputs.conda_dir }}
         run: |
           source ports
           set -x
-          sed -i "s|.*PORT.*|    \"PORT\": \"${workspace_port}\",|" service.json
-          sed -i "s/.*JOB_STATUS.*/    \"JOB_STATUS\": \"Running\",/" service.json 
-          sshcmd="ssh -o StrictHostKeyChecking=no -o ServerAliveInterval=60 -o ServerAliveCountMax=3 -L 0.0.0.0:${workspace_port}:localhost:${nginx_proxy_port} ${host}"
           ${sshcmd} << EOF
           set -x
           if [ -z "${load_env}" ]; then
@@ -143,17 +129,37 @@ jobs:
           else
             eval ${load_env}
           fi
-          export dashboard_port_worker=${cluster_port}
-          export http_prefix=/me/${workspace_port}/
+          export dashboard_port_worker=${dashboard_port}
+          export http_prefix=/me/session/${PW_USER}/${{ sessions.dashboard }}/
           cd ~/${PWD/#$HOME/}
-          python dask_script.py
+          python -u dask_script.py &
+          dask_script_pid=\$!
+          echo \${dask_script_pid} > dask_script.pid
+          wait \${dask_script_pid}
+          rm dask_script.pid
           EOF
-        cleanup: rm /tmp/${workspace_port}.port.used /tmp/${cluster_port}.port.used /tmp/${nginx_proxy_port}.port.used
+        
+        cleanup: |
+          sshcmd="ssh -o StrictHostKeyChecking=no ${{ inputs.resource.ip }}"
+          container_name=$(echo ${PWD} | rev | cut -d'/' -f1-2 | rev | tr '/' '-')
+          ${sshcmd} << EOF
+          cd ~/${PWD/#$HOME/}
+          sudo docker stop ${container_name}
+          # Check if the file dask_script.pid exists
+          if [ ! -f dask_script.pid ]; then
+            exit 0
+          fi
+          dask_script_pid=\$(cat dask_script.pid)
+          echo "Killing dask script PID \${dask_script_pid}"
+          kill \${dask_script_pid}
+          scancel \$(ls slurm-*.out | sed 's/slurm-\([0-9]\+\).out/\1/')
+          EOF
+
+
+
   start_nginx_proxy:
     needs:
-      - install_dask
-      - prepare_work_directory
-      - reserve_ports
+      - create_session
     steps:
       - name: Write Nginx config
         run: |
@@ -174,7 +180,7 @@ jobs:
             client_max_body_size 1000M;
 
             location / {
-              proxy_pass http://127.0.0.1:${cluster_port}/;  # Ensure this has a trailing slash
+              proxy_pass http://127.0.0.1:${dashboard_port}/me/session/${PW_USER}/${{ sessions.dashboard }}/;  # Ensure this has a trailing slash
               proxy_http_version 1.1;
               proxy_set_header Upgrade \$http_upgrade;
               proxy_set_header Connection "upgrade";
@@ -197,11 +203,15 @@ jobs:
           sshcmd: ssh -o StrictHostKeyChecking=no ${{ inputs.resource.ip }}
         run: |
           set -x
+          container_name=$(echo ${PWD} | rev | cut -d'/' -f1-2 | rev | tr '/' '-')
           ${sshcmd} << EOF
           cd ~/${PWD/#$HOME/}
           sudo service docker start
           touch empty
-          sudo docker run --rm -v $PWD/config.conf:/etc/nginx/conf.d/config.conf  -v $PWD/empty:/etc/nginx/conf.d/default.conf --network=host nginxinc/nginx-unprivileged:1.25.3
+          touch nginx.logs
+          # change ownership to nginx user
+          sudo chown 101:101 nginx.logs 
+          sudo docker run -d --rm --name ${container_name} -v $PWD/config.conf:/etc/nginx/conf.d/config.conf  -v $PWD/empty:/etc/nginx/conf.d/default.conf -v $PWD/nginx.logs:/var/log/nginx/access.log  -v $PWD/nginx.logs:/var/log/nginx/error.log --network=host nginxinc/nginx-unprivileged:1.25.3
           EOF
 'on':
   execute:
