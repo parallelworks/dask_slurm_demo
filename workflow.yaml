@@ -102,7 +102,6 @@ jobs:
           remotePort: "${{ needs.create_session.outputs.nginx_proxy_port }}"
           localPort: "${{ needs.create_session.outputs.local_port }}"
           remoteHost: "${{ needs.create_session.outputs.target_hostname }}"
-          status: running
           slug: "status"
           target: ${{ inputs.resource.id }}
           name: ${{ sessions.dashboard }}
